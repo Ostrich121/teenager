@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>目录</title>
+  <meta name="description" content="相关文献目录，展示标题、作者、作者单位、期刊名称与摘要，并可直接进入每篇 HTML 阅读。">
+  <style>
+    :root {
+      --bg-a: #f6f1e7;
+      --bg-b: #f8dcb8;
+      --ink: #0f172a;
+      --muted: #334155;
+      --accent: #cd5c08;
+      --card: rgba(255, 255, 255, 0.74);
+      --line: rgba(148, 163, 184, 0.34);
+      --soft-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Times New Roman", "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+      background:
+        radial-gradient(1200px 620px at -10% -10%, rgba(255, 255, 255, 0.72), transparent 55%),
+        radial-gradient(900px 500px at 110% 10%, rgba(255, 182, 118, 0.34), transparent 55%),
+        linear-gradient(140deg, var(--bg-a), var(--bg-b));
+    }
+
+    .bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 72%);
+      z-index: 0;
+    }
+
+    .index-page {
+      position: relative;
+      padding: 24px;
+    }
+
+    .hero,
+    .toolbar,
+    .card-grid {
+      position: relative;
+      z-index: 1;
+      width: min(1160px, 100%);
+      margin-inline: auto;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--soft-shadow);
+      padding: 28px 28px 22px;
+      animation: rise 0.66s ease both;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      margin: 10px 0 8px;
+      font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+      font-size: clamp(1.85rem, 3.2vw, 3rem);
+      line-height: 1.2;
+    }
+
+    .hero-sub {
+      margin: 0;
+      max-width: 74ch;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .stats {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stats span {
+      border: 1px solid rgba(205, 92, 8, 0.28);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.92rem;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .toolbar {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 380px);
+      gap: 12px;
+      align-items: end;
+    }
+
+    .filter-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .filter-title {
+      margin: 0 0 2px;
+      color: #475569;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #1e293b;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+    }
+
+    .filter-btn.active {
+      border-color: rgba(205, 92, 8, 0.5);
+      color: #7c2d12;
+    }
+
+    .search-wrap {
+      display: grid;
+      gap: 6px;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    .card-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .paper-card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--soft-shadow);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: rise 0.55s ease both;
+    }
+
+    .paper-card h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.38;
+    }
+
+    .paper-card h2 a {
+      color: #7c2d12;
+      text-decoration: none;
+    }
+
+    .paper-card h2 a:hover {
+      text-decoration: underline;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .card-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.34);
+    }
+
+    .meta-row {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .abstract-preview {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .abstract-preview summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: #7c2d12;
+    }
+
+    .abstract-preview p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .read-link {
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: #7c2d12;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 10px 12px;
+    }
+
+    .read-link:hover {
+      background: #9a3412;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 28px 14px;
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      border: 1px dashed var(--line);
+    }
+
+    .empty-state h2 {
+      margin: 0;
+    }
+
+    .empty-state p {
+      margin: 6px 0 0;
+      color: #475569;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .index-page {
+        padding: 14px;
+      }
+      .hero {
+        padding: 18px 14px 16px;
+      }
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="index-page">
+  <div class="bg-decor"></div>
+
+  <header class="hero">
+    <p class="eyebrow">GitHub Pages · Static Archive</p>
+    <h1>文献目录</h1>
+    <p class="hero-sub">目录自动链接 <code>content</code> 中全部 HTML，并展示每篇文章的标题、作者、作者单位、期刊名称与摘要，可直接进入全文阅读。</p>
+    <div class="stats">
+      <span>总计 <strong id="statTotal">0</strong></span>
+      <span>当前显示 <strong id="statVisible">0</strong></span>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="filter-stack">
+      <div>
+        <p class="filter-title">文献分类</p>
+        <div class="filter-buttons" id="langFilters"></div>
+      </div>
+      <div>
+        <p class="filter-title">年份筛选</p>
+        <div class="filter-buttons" id="yearFilters"></div>
+      </div>
+    </div>
+    <label class="search-wrap" for="searchInput">
+      <span>检索</span>
+      <input id="searchInput" type="search" placeholder="按标题、作者、单位、期刊或摘要搜索">
+    </label>
+  </section>
+
+  <main class="card-grid" id="paperGrid"></main>
+
+  <template id="emptyStateTemplate">
+    <section class="empty-state">
+      <h2>没有匹配结果</h2>
+      <p>请尝试更换关键词或切换年份筛选。</p>
+    </section>
+  </template>
+
+  <script id="paperData" type="application/json">[{"title": "福建省高校学生“青年实干家计划”培训班《学员手册》4.22(1)", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "学校抓实兼职教师队伍建设，立足团干部教育培训需要，建立团干部培训师资库，将中共福建省委党校（福建行政学院）和省内外高等院校政治素质好、授课水平高的专家学者纳入师资库，聘请担任团校客座教授", "journal": "省团校培训部在学员入学报", "abstract": "未自动识别", "link": "content/CN/福建省高校学生“青年实干家计划”培训班《学员手册》4.22(1).html"}, {"title": "第一部分", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "未自动识别", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/第一部分.html"}, {"title": "第三部分：案例1材料", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "如Vlog、主题沙龙、社区实验项目）来重新诠释和塑造社区文化形象，并将基层工作场景转化为青年展示才华、实现创意、积累真实成就的实验室，从而扭转基层工作在青年心中的传统刻板印象，构建“吸引力-参与感-成长性”的良性循环", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/第三部分：案例1材料.html"}, {"title": "第三部分：案例2材料", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "泉州市数字经济产业园OPC 招商 OPC 全称One Person Company，一人公司，超级个体定义：一个人通过AI 工具实现全链条商业闭环，用AI 手段进行商业活动，创造最大经济价值。是泉州市丰泽区政府3 个月前新提出的项目。鼓励泉州市的创业者创业、赚钱", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/第三部分：案例2材料.html"}, {"title": "第四部分：总结", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "总结、结语【青年】树立正确思想，厚植爱国情怀心怀理想主义，在千锤百炼中成长以奋斗为底色，扛起责任与担当【实干】求真务实，立足实际，摸清实情一切从实际出发，实践是检验真理的唯一标准【家】专业领域：练就过硬本领实践岗位：解决真实问题思政教育：筑牢信仰之基在实践培训中我们走进福建农林大学菌草中心，我们深刻感悟到“菌草精神”——脚踏实地、深入基层、锲而不舍", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/第四部分：总结.html"}, {"title": "讨论录音", "authors": "未自动识别", "year": "", "language": "CN", "affiliation": "说话人1 差不多就是这样，谢谢大家。说话人5 嗯，大家好，我是薛海琴，我来自福建莆田，然后我是福建理工大学呃公共管理专业的。然后我是在25 年2 月到3", "journal": "未自动识别", "abstract": "未自动识别", "link": "content/CN/讨论录音.html"}]</script>
+  <script>
+    (function () {
+      "use strict";
+
+      const paperDataEl = document.getElementById("paperData");
+      const langFiltersEl = document.getElementById("langFilters");
+      const yearFiltersEl = document.getElementById("yearFilters");
+      const searchInput = document.getElementById("searchInput");
+      const paperGrid = document.getElementById("paperGrid");
+      const emptyStateTemplate = document.getElementById("emptyStateTemplate");
+      const statTotal = document.getElementById("statTotal");
+      const statVisible = document.getElementById("statVisible");
+
+      if (!paperDataEl || !langFiltersEl || !yearFiltersEl || !searchInput || !paperGrid || !statTotal || !statVisible) {
+        return;
+      }
+
+      let papers = [];
+      try {
+        papers = JSON.parse(paperDataEl.textContent || "[]");
+      } catch (error) {
+        paperGrid.innerHTML = "<section class=\"empty-state\"><h2>数据加载失败</h2><p>请检查 paper-data.json 与 index 页面数据是否完整。</p></section>";
+        return;
+      }
+
+      papers.sort((a, b) => {
+        const yearDiff = String(b.year || "").localeCompare(String(a.year || ""));
+        if (yearDiff !== 0) {
+          return yearDiff;
+        }
+        return String(a.title || "").localeCompare(String(b.title || ""), "zh-CN");
+      });
+
+      const yearSet = Array.from(new Set(papers.map((paper) => String(paper.year || "")).filter(Boolean)));
+      yearSet.sort((a, b) => b.localeCompare(a));
+
+      let activeLang = "all";
+      let activeYear = "all";
+
+      function resolveLanguage(paper) {
+        const raw = String(paper.language || paper.category || "").toUpperCase();
+        if (raw === "CN" || raw === "EN") {
+          return raw;
+        }
+        const link = String(paper.link || "");
+        if (link.includes("/EN/")) {
+          return "EN";
+        }
+        if (link.includes("/CN/")) {
+          return "CN";
+        }
+        const mixedText = [paper.title, paper.abstract].map((item) => String(item || "")).join(" ");
+        return /[\u4e00-\u9fff]/.test(mixedText) ? "CN" : "EN";
+      }
+
+      function clipText(text, maxLen) {
+        const raw = String(text || "").trim() || "未自动识别";
+        if (raw.length <= maxLen) {
+          return raw;
+        }
+        return raw.slice(0, maxLen).trimEnd() + "…";
+      }
+
+      function makeMetaRow(label, value) {
+        const row = document.createElement("p");
+        row.className = "meta-row";
+
+        const strong = document.createElement("strong");
+        strong.textContent = label + "：";
+        row.appendChild(strong);
+
+        row.append(" " + clipText(value, 180));
+        return row;
+      }
+
+      function createCard(paper) {
+        const article = document.createElement("article");
+        article.className = "paper-card";
+
+        const top = document.createElement("div");
+        top.className = "card-top";
+
+        const badgeType = document.createElement("span");
+        badgeType.className = "card-badge";
+        badgeType.textContent = resolveLanguage(paper) === "EN" ? "English" : "中文文献";
+
+        const badgeYear = document.createElement("span");
+        badgeYear.className = "card-badge";
+        badgeYear.textContent = paper.year || "年份未知";
+
+        top.appendChild(badgeType);
+        top.appendChild(badgeYear);
+
+        const heading = document.createElement("h2");
+        const titleLink = document.createElement("a");
+        titleLink.href = encodeURI(String(paper.link || "#"));
+        titleLink.textContent = paper.title || "未自动识别";
+        heading.appendChild(titleLink);
+
+        const authorRow = makeMetaRow("作者", paper.authors);
+        const affRow = makeMetaRow("作者单位", paper.affiliation);
+        const journalRow = makeMetaRow("期刊名称", paper.journal);
+
+        const details = document.createElement("details");
+        details.className = "abstract-preview";
+
+        const summary = document.createElement("summary");
+        summary.textContent = "摘要";
+
+        const abstractText = document.createElement("p");
+        abstractText.textContent = clipText(paper.abstract, 360);
+
+        details.appendChild(summary);
+        details.appendChild(abstractText);
+
+        const readLink = document.createElement("a");
+        readLink.className = "read-link";
+        readLink.href = encodeURI(String(paper.link || "#"));
+        readLink.textContent = "进入 HTML 阅读";
+
+        article.appendChild(top);
+        article.appendChild(heading);
+        article.appendChild(authorRow);
+        article.appendChild(affRow);
+        article.appendChild(journalRow);
+        article.appendChild(details);
+        article.appendChild(readLink);
+
+        return article;
+      }
+
+      function buildLanguageFilters() {
+        const options = [
+          { key: "all", label: "全部" },
+          { key: "CN", label: "中文" },
+          { key: "EN", label: "English" },
+        ];
+        options.forEach((option, idx) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = idx === 0 ? "filter-btn active" : "filter-btn";
+          button.textContent = option.label;
+          button.dataset.lang = option.key;
+          langFiltersEl.appendChild(button);
+        });
+
+        langFiltersEl.querySelectorAll(".filter-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            langFiltersEl.querySelectorAll(".filter-btn").forEach((node) => node.classList.remove("active"));
+            button.classList.add("active");
+            activeLang = button.dataset.lang || "all";
+            render();
+          });
+        });
+      }
+
+      function buildYearFilters() {
+        const allButton = document.createElement("button");
+        allButton.type = "button";
+        allButton.className = "filter-btn active";
+        allButton.textContent = "全部年份";
+        allButton.dataset.filter = "all";
+        yearFiltersEl.appendChild(allButton);
+
+        yearSet.forEach((year) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "filter-btn";
+          button.textContent = year;
+          button.dataset.filter = year;
+          yearFiltersEl.appendChild(button);
+        });
+
+        yearFiltersEl.querySelectorAll(".filter-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            yearFiltersEl.querySelectorAll(".filter-btn").forEach((node) => node.classList.remove("active"));
+            button.classList.add("active");
+            activeYear = button.dataset.filter || "all";
+            render();
+          });
+        });
+      }
+
+      function filterPapers() {
+        const keyword = String(searchInput.value || "").trim().toLowerCase();
+        return papers.filter((paper) => {
+          const langOk = activeLang === "all" || resolveLanguage(paper) === activeLang;
+          if (!langOk) {
+            return false;
+          }
+          const yearOk = activeYear === "all" || String(paper.year || "") === activeYear;
+          if (!yearOk) {
+            return false;
+          }
+          if (!keyword) {
+            return true;
+          }
+          const searchText = [paper.title, paper.authors, paper.affiliation, paper.journal, paper.abstract, paper.year]
+            .map((value) => String(value || ""))
+            .join(" ")
+            .toLowerCase();
+          return searchText.includes(keyword);
+        });
+      }
+
+      function render() {
+        const visiblePapers = filterPapers();
+        paperGrid.textContent = "";
+
+        visiblePapers.forEach((paper) => {
+          paperGrid.appendChild(createCard(paper));
+        });
+
+        if (visiblePapers.length === 0 && emptyStateTemplate && "content" in emptyStateTemplate) {
+          paperGrid.appendChild(emptyStateTemplate.content.cloneNode(true));
+        }
+
+        statTotal.textContent = String(papers.length);
+        statVisible.textContent = String(visiblePapers.length);
+      }
+
+      buildLanguageFilters();
+      buildYearFilters();
+      searchInput.addEventListener("input", render);
+      render();
+    })();
+  </script>
+</body>
+</html>
